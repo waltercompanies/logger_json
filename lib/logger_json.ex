@@ -280,7 +280,11 @@ defmodule LoggerJSON do
         apply(module, fun, [event]) <> "\n"
 
       json_encoder ->
-        [json_encoder.encode_to_iodata!(event) | "\n"]
+        try do
+          [json_encoder.encode_to_iodata!(event) | "\n"]
+        rescue
+          e -> IO.puts("ERROR: Caught exception while encoding iodata: #{inspect(e)}. Event: #{inspect(event)}")
+        end
     end
   end
 
