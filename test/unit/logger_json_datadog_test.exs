@@ -221,7 +221,10 @@ defmodule LoggerJSONDatadogTest do
     end
 
     test "is triggered" do
-      Logger.configure_backend(LoggerJSON, metadata: [], on_init: {LoggerJSONDatadogTest, :on_init_cb, []})
+      Logger.configure_backend(LoggerJSON,
+        metadata: [],
+        on_init: {LoggerJSONDatadogTest, :on_init_cb, []}
+      )
 
       Logger.metadata(user_id: 11)
 
@@ -235,14 +238,13 @@ defmodule LoggerJSONDatadogTest do
   end
 
   test "contains source location" do
-    %{module: mod, function: {name, arity}, file: file, line: line} = __ENV__
+    %{module: mod, function: {name, arity}, file: _file, line: _line} = __ENV__
 
     log =
       fn -> Logger.debug("hello") end
       |> capture_log()
       |> Jason.decode!()
 
-    line = line + 3
     function = "Elixir.#{inspect(mod)}.#{name}/#{arity}"
 
     assert %{
@@ -302,7 +304,11 @@ defmodule LoggerJSONDatadogTest do
 
   test "logs initial call when present" do
     Logger.configure_backend(LoggerJSON, metadata: [:initial_call])
-    Logger.metadata(crash_reason: {%RuntimeError{message: "oops"}, []}, initial_call: {Foo, :bar, 3})
+
+    Logger.metadata(
+      crash_reason: {%RuntimeError{message: "oops"}, []},
+      initial_call: {Foo, :bar, 3}
+    )
 
     log =
       capture_log(fn -> Logger.debug("hello") end)
